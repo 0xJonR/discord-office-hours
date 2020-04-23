@@ -86,9 +86,12 @@ async def on_message(message):
 			msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. '''
 			await message.channel.send(msg)
 
-
-#		if message.content.startswith('!room'):
-#			message.guild.
+			#TODO:
+		#if message.content.startswith('!room'):
+			# create new role for student being helped
+			# allow only that student and TAs in that room
+			# max rooms = n
+			# have a ~!close message to close a room
 
 if __name__ == "__main__":
 	mytoken = sys.argv[1]

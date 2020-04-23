@@ -3,10 +3,10 @@ Discord Bot that implements an automatic queue for students to enqueue themselve
 <br>**Note**: Bot only looks for messages sent in a channel called "office-hours-queue"
 
 ## List of commands: 
-* !Enqueue or !E 
+* !enqueue or !E 
   <br> Enqueues sender of message onto queue. All permissions are allowed to enqueue themselves. If one is already on the queue, sends them to the bottom.
   
-* !Dequeue or !D
+* !dequeue or !D
   <br> Dequeues head of queue, and sends a mention to the user in the channel that they're ready to be helped. **Only works if sent by user with TA role**.
   
 * !show or !S

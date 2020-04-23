@@ -6,7 +6,7 @@ from collections import deque
 
 client = discord.Client()
 
-studentsQ = []
+studentsQ = [] #of type discord.Member
 
 def isTA(usr: discord.Member):
 	roles = usr.roles
@@ -18,9 +18,21 @@ def isTA(usr: discord.Member):
 def printQ():
 	st = "Queue is:\n"
 	for ele in studentsQ:
-		st += ele
+		st += ele.name
 		st += '\n'
 	return st
+
+def putStudentInBack(badBoy: discord.Member, currentQueue):
+	newQueue = []
+	for stud in currentQueue:
+		if stud == badBoy:
+			#donothing
+			print("Spam Alert")
+		else:
+			newQueue.append(stud)
+	newQueue.append(stud)
+	studentsQ = newQueue
+	return
 
 @client.event
 async def on_ready():
@@ -40,16 +52,22 @@ async def on_message(message):
 			#await message.channel.send('Hello'!)
 			stu = message.author
 			name = stu.mention
-			studentsQ.append(name)
-			#print('Recieved message')
-			response = "Enqeueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
-			await message.channel.send(response)
+			if stu in studentsQ:
+				#do put student in back of the queue
+				putStudentInBack(stu, studentsQ)
+				response = "{} You were already in the queue! You've been moved to the back.".format(stu.mention)
+				await message.channel.send(response)
+			else:
+				studentsQ.append(stu)
+				#print('Recieved message')
+				response = "Enqeueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
+				await message.channel.send(response)
 
 					#dequeue: TA only 
 		if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
 			if len(studentsQ) > 0:
 				stu = studentsQ.pop(0)
-				msg = "{}, you are next! {} will help you now!".format(stu, message.author.mention)
+				msg = "{}, you are next! {} will help you now!".format(stu.mention, message.author.mention)
 				await message.channel.send(msg)
 			else:
 				await message.channel.send("Queue is empty! Good job!")

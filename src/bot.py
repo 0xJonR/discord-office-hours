@@ -39,7 +39,7 @@ async def on_message(message):
 		if message.content.startswith('!enqueue') or message.content.startswith('!E'):
 			#await message.channel.send('Hello'!)
 			stu = message.author
-			name = stu.name
+			name = stu.mention
 			studentsQ.append(name)
 			#print('Recieved message')
 			response = "Enqeueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
@@ -49,7 +49,7 @@ async def on_message(message):
 		if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
 			if len(studentsQ) > 0:
 				stu = studentsQ.pop(0)
-				msg = "@{}, you are next! @{} will help you now!".format(stu, message.author.name)
+				msg = "{}, you are next! {} will help you now!".format(stu, message.author.mention)
 				await message.channel.send(msg)
 			else:
 				await message.channel.send("Queue is empty! Good job!")
@@ -67,6 +67,10 @@ async def on_message(message):
 		if message.content.startswith('!help'):
 			msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. '''
 			await message.channel.send(msg)
+
+
+#		if message.content.startswith('!room'):
+#			message.guild.
 
 if __name__ == "__main__":
 	mytoken = sys.argv[1]

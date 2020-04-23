@@ -30,9 +30,8 @@ def putStudentInBack(badBoy: discord.Member, currentQueue):
 			print("Spam Alert")
 		else:
 			newQueue.append(stud)
-	newQueue.append(stud)
-	studentsQ = newQueue
-	return
+	newQueue.append(badBoy)
+	return newQueue
 
 @client.event
 async def on_ready():
@@ -40,6 +39,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	global studentsQ
 	#here we do all logic for message events
 	if message.author == client.user:
 		return 
@@ -54,13 +54,13 @@ async def on_message(message):
 			name = stu.mention
 			if stu in studentsQ:
 				#do put student in back of the queue
-				putStudentInBack(stu, studentsQ)
+				studentsQ = putStudentInBack(stu, studentsQ)
 				response = "{} You were already in the queue! You've been moved to the back.".format(stu.mention)
 				await message.channel.send(response)
 			else:
 				studentsQ.append(stu)
 				#print('Recieved message')
-				response = "Enqeueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
+				response = "Enqueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
 				await message.channel.send(response)
 
 					#dequeue: TA only 
@@ -95,5 +95,6 @@ async def on_message(message):
 
 if __name__ == "__main__":
 	mytoken = sys.argv[1]
+	studentsQ = []
 	client.run(mytoken)		#TODO: system env to run from a bat script to keep my token safe online
 	main()

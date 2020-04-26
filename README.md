@@ -13,4 +13,7 @@ Discord Bot that implements an automatic queue for students to enqueue themselve
   <br> Shows the queue with names of those in it without using mentions. 
 
 * !help
-  <br> Shows all usable commands. 
+  <br> Shows all usable commands.
+
+## Installation 
+*  execute in terminal: "python3 bot.py [your_dicsord_bot_token]" 

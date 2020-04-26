@@ -6,12 +6,15 @@ from collections import deque
 
 client = discord.Client()
 
+TAID= "539163810796142596"
+officeHoursChannelID="688099265314029735"
+
 studentsQ = [] #of type discord.Member
 
 def isTA(usr: discord.Member):
 	roles = usr.roles
 	for x in roles:
-		if x.name == "TA":
+		if x.id == TAID:
 			return True
 	return False
 
@@ -45,7 +48,7 @@ async def on_message(message):
 		return 
 		#prevents infinite loops of reading own message
 
-	if message.channel.name == "office-hours-queue":
+	if message.channel.id == officeHoursChannelID:
 # only want messages in OH		
 					#enqueue
 		if message.content.startswith('!enqueue') or message.content.startswith('!E'):

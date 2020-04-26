@@ -54,9 +54,9 @@ async def on_message(message):
 
     if message.channel.name == "office-hours-queue":
         # only want messages in OH
-        # enqueue
+
+        #               enqueue
         if message.content.startswith('!enqueue') or message.content.startswith('!E'):
-            # await message.channel.send('Hello'!)
             stu = message.author
             name = stu.mention
             if stu in studentsQ:
@@ -70,6 +70,7 @@ async def on_message(message):
                 response = "Enqueued {} successfully. Position in Queue: {}".format(name, len(studentsQ))
                 await message.channel.send(response)
 
+        #               leave queue
         if message.content.startswith('!leave') or message.content.startswith('!L'):
             stu = message.author
             name = stu.mention
@@ -103,14 +104,14 @@ async def on_message(message):
                 await message.channel.send("There is nobody in the queue.")
 
         # show queue
-        if message.content.startswith('!show') or message.content.startswith(
-                '!showqueue') or message.content.startswith('!S'):
+        if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):
             if (not studentsQ):
                 await message.channel.send("Wow! The queue is empty right now!")  # not studentsQ is if empty
             else:
                 msg = printQ()
                 await message.channel.send(msg)
 
+        #help
         if message.content.startswith('!help'):
             msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. To leave the queue, you can use !leave or !L.'''
             await message.channel.send(msg)

@@ -49,9 +49,12 @@ async def on_message(message):
                     msg = "{} you were already in the list! You have been moved to the back.".format(name)
                     await message.channel.send(msg)
                 else:
-                    queue.append(stu)
-                    msg = "{} you have been succesfully added to the queue in position: {}".format(name, len(queue))
-                    await message.channel.send(msg)
+                    if(len(queue) == 0):
+                        msg = "{} you have been succesfully added to the queue, and you are first in line!".format(name)
+                    else:   
+                        queue.append(stu)
+                        msg = "{} you have been succesfully added to the queue in position: {}".format(name, len(queue))
+                        await message.channel.send(msg)
             else:
                 queue = [stu]
                 id_to_list[thisid] = queue

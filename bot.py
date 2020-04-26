@@ -10,7 +10,7 @@ client = discord.Client()
 TAID= "539163810796142596"
 officeHoursChannelID="688099265314029735"
 
-studentsQ = defaultdict(list) #TODO: not have one queue for all servers connected to
+studentsQ: dict = {"id": [0, 1]} #TODO: not have one queue for all servers connected to
 #                   have queue per server
 
 def isTA(usr: discord.Member):
@@ -50,13 +50,7 @@ async def on_ready(): #onready is called after all guilds are added to client
 
 @client.event
 async def on_message(message):
-    global studentsQ
-    def getQ():
-        if message.guild.id in studentsQ:
-            return studentsQ.get(str(message.guild.id))
-        else:
-            return []
-    thisqueue = getQ()            
+    global studentsQ            
     # here we do all logic for message events
     if message.author == client.user:
         return
@@ -67,13 +61,14 @@ async def on_message(message):
 
         #               enqueue
         if message.content.startswith('!enqueue') or message.content.startswith('!E'):
-            print("queueID:{}".format(thisqueue))
             stu = message.author
             name = stu.mention
-            if stu in thisqueue:
+            q: dict = studentsQ.get(str(message.guild.id))
+            if stu in q:
                 # do put student in back of the queue
-                thisqueue = putStudentInBack(stu, studentsQ)
-                studentsQ[str(message.guild.id)] = thisqueue
+                thisqueue = putStudentInBack(stu, studentsQ[str(message.guild.id)])
+                print(thisqueue)
+                studentsQ.update({str(message.guild.id) : thisqueue})
                 response = "{} You were already in the queue! You've been moved to the back.".format(stu.mention)
                 await message.channel.send(response)
             else:
@@ -84,6 +79,7 @@ async def on_message(message):
 
         #               leave queue
         if message.content.startswith('!leave') or message.content.startswith('!L'):
+            thisqueue = studentsQ.get(message.guild.id)
             stu = message.author
             name = stu.mention
             if stu in thisqueue:
@@ -98,6 +94,7 @@ async def on_message(message):
 
         # dequeue: TA only
         if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
+            thisqueue = studentsQ.get(message.guild.id)
             if len(thisqueue) > 0:
                 stu = thisqueue.pop(0)
                 msg = "{}, you are next! {} will help you now!".format(stu.mention, message.author.mention)
@@ -108,9 +105,10 @@ async def on_message(message):
                 #TODO: bugfix not printing message
         # Clear queue: TA only
         if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
+            thisqueue = studentsQ.get(message.guild.id)
             if len(thisqueue) > 0:
                 thisqueue = []
-                studentsQ[str(message.guild.id)] = thisqueue
+                studentsQ[str(message.guild.idid)] = thisqueue
                 msg = "The queue has been cleared!"
                 await message.channel.send(msg)
             else:
@@ -118,6 +116,7 @@ async def on_message(message):
 
         # show queue
         if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):
+            thisqueue = studentsQ.get(message.guild.id)
             print("queueID:{}".format(thisqueue))
             if (not thisqueue):
                 await message.channel.send("Wow! The queue is empty right now!")  # not studentsQ is if empty

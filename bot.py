@@ -51,6 +51,8 @@ async def on_message(message):
                 else:
                     if(len(queue) == 0):
                         msg = "{} you have been succesfully added to the queue, and you are first in line!".format(name)
+                        queue.append(stu)
+                        await message.channel.send(msg)
                     else:   
                         queue.append(stu)
                         msg = "{} you have been succesfully added to the queue in position: {}".format(name, len(queue))
@@ -107,7 +109,6 @@ async def on_message(message):
             msg = "Cleared the list."
             await message.channel.send(msg)
 
-
         #              show queue
         if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):
             if thisid in id_to_list:
@@ -140,7 +141,6 @@ async def on_message(message):
 
 if __name__ == "__main__":
     mytoken = sys.argv[1]
-    studentsQ = []
     client.run(mytoken)  # TODO: system env to run from a bat script to keep my token safe online
     main()
 

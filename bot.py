@@ -6,16 +6,18 @@ from collections import deque
 
 client = discord.Client()
 
-studentsQ = []  # of type discord.Member
 
+TAID= "539163810796142596"
+officeHoursChannelID="688099265314029735"
+
+studentsQ = [] #of type discord.Member
 
 def isTA(usr: discord.Member):
-    roles = usr.roles
-    for x in roles:
-        if x.name == "TA":
-            return True
-    return False
-
+	roles = usr.roles
+	for x in roles:
+		if x.id == TAID:
+			return True
+	return False
 
 def printQ():
     st = "Queue is:\n"
@@ -110,7 +112,7 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         if message.content.startswith('!help'):
-            msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. '''
+            msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. To leave the queue, you can use !leave or !L.'''
             await message.channel.send(msg)
 
     # TODO:
@@ -127,3 +129,4 @@ if __name__ == "__main__":
     studentsQ = []
     client.run(mytoken)  # TODO: system env to run from a bat script to keep my token safe online
     main()
+

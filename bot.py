@@ -15,7 +15,7 @@ studentsQ = [] #of type discord.Member
 def isTA(usr: discord.Member):
 	roles = usr.roles
 	for x in roles:
-		if x.id == TAID:
+		if x.name == "TA":
 			return True
 	return False
 
@@ -93,7 +93,7 @@ async def on_message(message):
             else:
                 await message.channel.send("Queue is empty! Good job!")
 
-
+                #TODO: bugfix not printing message
         # Clear queue: TA only
         if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
             if len(studentsQ) > 0:
@@ -113,7 +113,7 @@ async def on_message(message):
 
         #help
         if message.content.startswith('!help'):
-            msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. To leave the queue, you can use !leave or !L.'''
+            msg = ''' To enqueue yourself, send a "!enqueue" or "!E" message. To see the current Queue, send a "!show" or "!S" message. TA's will dequeue you with a "!dequeue" or "!D" message. To leave the queue, you can use "!leave" or "!L".'''
             await message.channel.send(msg)
 
     # TODO:

@@ -46,7 +46,7 @@ async def on_message(message):
                 if stu in queue:
                     queue.remove(stu)
                     queue.append(stu)
-                    msg = "{} you were already in the list! You have been moved to the back."
+                    msg = "{} you were already in the list! You have been moved to the back.".format(name)
                     await message.channel.send(msg)
                 else:
                     queue.append(stu)

@@ -4,21 +4,12 @@ import sys
 from discord.ext import commands
 from collections import defaultdict
 
-client = discord.Client()
-
-
-TAID= "539163810796142596"
-officeHoursChannelID="688099265314029735"
-
-studentsQ: dict = {"id": [0, 1]} #TODO: not have one queue for all servers connected to
-#                   have queue per server
-
 def isTA(usr: discord.Member):
-	roles = usr.roles
-	for x in roles:
-		if x.name == "TA":
-			return True
-	return False
+    roles = usr.roles
+    for x in roles:
+        if x.name == "TA":
+            return True
+    return False
 
 def printQ(q):
     st = "Queue is:\n"
@@ -27,19 +18,8 @@ def printQ(q):
         st += '\n'
     return st
 
-def addToDict(guild, dict):
-    print("test")
-
-def putStudentInBack(badBoy: discord.Member, currentQueue):
-    newQueue = []
-    for stud in currentQueue:
-        if stud == badBoy:
-            # donothing
-            print("Spam Alert")
-        else:
-            newQueue.append(stud)
-    newQueue.append(badBoy)
-    return newQueue
+client = discord.Client()
+id_to_list = {} #string->List dictionary
 
 
 @client.event
@@ -50,69 +30,48 @@ async def on_ready(): #onready is called after all guilds are added to client
 
 @client.event
 async def on_message(message):
-    global studentsQ            
-    # here we do all logic for message events
+    global id_to_list            
+    thisid = str(message.guild.id)
     if message.author == client.user:
-        return
-    # prevents infinite loops of reading own message
+        return # prevents infinite loops of reading own message
 
-    if message.channel.name == "office-hours-queue":
-        # only want messages in OH
+    if message.channel.name == "office-hours-queue": # only want messages in OH
 
         #               enqueue
         if message.content.startswith('!enqueue') or message.content.startswith('!E'):
             stu = message.author
             name = stu.mention
-            q: dict = studentsQ.get(str(message.guild.id))
-            if stu in q:
-                # do put student in back of the queue
-                thisqueue = putStudentInBack(stu, studentsQ[str(message.guild.id)])
-                print(thisqueue)
-                studentsQ.update({str(message.guild.id) : thisqueue})
-                response = "{} You were already in the queue! You've been moved to the back.".format(stu.mention)
-                await message.channel.send(response)
+            if thisid in id_to_list:
+                queue = id_to_list[thisid]
+                if stu in queue:
+                    queue.remove(stu)
+                    queue.append(stu)
+                    msg = "{} you were already in the list! You have been moved to the back."
+                    await message.channel.send(msg)
+                else:
+                    queue.append(stu)
+                    msg = "{} you have been succesfully added to the queue in position: {}".format(name, len(queue))
+                    await message.channel.send(msg)
             else:
-                thisqueue.append(stu)
-                # print('Recieved message')
-                response = "Enqueued {} successfully. Position in Queue: {}".format(name, len(thisqueue))
-                await message.channel.send(response)
+                queue = [stu]
+                id_to_list[thisid] = queue
+                msg = "{} you have been succesfully added to the queue, and you are next!".format(name)
+                await message.channel.send(msg)
 
+            
         #               leave queue
         if message.content.startswith('!leave') or message.content.startswith('!L'):
-            thisqueue = studentsQ.get(message.guild.id)
             stu = message.author
             name = stu.mention
-            if stu in thisqueue:
-                # Remove ths student from the queue
-                thisqueue.remove(stu)
-                response = "You've been removed from the queue, {}!".format(name)
-                await message.channel.send(response)
-            else:
-                # The student wasn't in the queue to begin with
-                response = "You weren't in the queue, {}.".format(name)
-                await message.channel.send(response)
 
         # dequeue: TA only
         if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
-            thisqueue = studentsQ.get(message.guild.id)
-            if len(thisqueue) > 0:
-                stu = thisqueue.pop(0)
-                msg = "{}, you are next! {} will help you now!".format(stu.mention, message.author.mention)
-                await message.channel.send(msg)
-            else:
-                await message.channel.send("Queue is empty! Good job!")
+            print()
 
-                #TODO: bugfix not printing message
         # Clear queue: TA only
         if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
-            thisqueue = studentsQ.get(message.guild.id)
-            if len(thisqueue) > 0:
-                thisqueue = []
-                studentsQ[str(message.guild.idid)] = thisqueue
-                msg = "The queue has been cleared!"
-                await message.channel.send(msg)
-            else:
-                await message.channel.send("There is nobody in the queue.")
+            print()
+
 
         # show queue
         if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):

@@ -63,24 +63,62 @@ async def on_message(message):
         if message.content.startswith('!leave') or message.content.startswith('!L'):
             stu = message.author
             name = stu.mention
-
-        # dequeue: TA only
-        if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
-            print()
-
-        # Clear queue: TA only
-        if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
-            print()
-
-
-        # show queue
-        if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):
-            thisqueue = studentsQ.get(message.guild.id)
-            print("queueID:{}".format(thisqueue))
-            if (not thisqueue):
-                await message.channel.send("Wow! The queue is empty right now!")  # not studentsQ is if empty
+            if thisid in id_to_list:
+                queue = id_to_list[thisid]
+                if stu in queue:
+                    queue.remove(stu)
+                    msg = "{} you have succesfully removed yourself from the queue.".format(name)
+                    await message.channel.send(msg)
+                else:
+                    msg = "{}, according to my records, you were already not in the queue.".format(name)
+                    await message.channel.send(msg)
             else:
-                msg = printQ(thisqueue)
+                #leave called before any enqueues
+                print("edge case")
+                msg = "{}, according to my records, you were already not in the queue.".format(name)
+                await message.channel.send(msg)
+
+
+        #               dequeue: TA only
+        if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
+            ta = message.author.mention
+            if thisid in id_to_list:
+                queue = id_to_list[thisid]
+                if(len(queue) > 0):
+                    stu = queue.pop(0)
+                    msg = "{}, you are next! {} is available to help you now!".format(stu.mention, ta)
+                    await message.channel.send(msg)
+                else:
+                    #no one in queue
+                    msg = "Good job TAs! The Queue is empty!"
+                    await message.channel.send(msg)
+            else:
+                #called before anyone enqueued
+                msg = "Good job TAs! The Queue is empty!"
+                await message.channel.send(msg)
+
+
+        #           Clear queue: TA only
+        if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
+            id_to_list[thisid] = []
+            msg = "Cleared the list."
+            await message.channel.send(msg)
+
+
+        #              show queue
+        if message.content.startswith('!show') or message.content.startswith('!showqueue') or message.content.startswith('!S'):
+            if thisid in id_to_list:
+                queue = id_to_list[thisid]
+                if queue:
+                    #printQ
+                    msg = printQ(queue)
+                    await message.channel.send(msg)
+                else:
+                    msg = "The queue is empty right now."
+                    await message.channel.send(msg)    
+            else:
+                msg = "The queue is empty right now."
+                id_to_list[thisid] = []
                 await message.channel.send(msg)
 
         #help

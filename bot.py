@@ -16,7 +16,8 @@ def isTA(usr: discord.Member):
 def printQ(q):
     st = "Queue is:\n"
     for x, ele in enumerate(q):
-        st += "{}. {}\n".format(x + 1, ele.name)
+        nickname = "" if (not ele.nick) else " ({})".format(ele.nick)  # If the user has a nickname, add it in parenthesis
+        st += "{}. {}{}\n".format(x + 1, ele.name, nickname)
     return st
 
 
@@ -50,18 +51,18 @@ async def on_message(message):
                     msg = "{} you were already in the list! You have been moved to the back.".format(name)
                     await message.channel.send(msg)
                 else:
-                    if (len(queue) == 0):
-                        msg = "{} you have been succesfully added to the queue, and you are first in line!".format(name)
+                    if len(queue) == 0:
+                        msg = "{} you have been successfully added to the queue, and you are first in line!".format(name)
                         queue.append(stu)
                         await message.channel.send(msg)
                     else:
                         queue.append(stu)
-                        msg = "{} you have been succesfully added to the queue in position: {}".format(name, len(queue))
+                        msg = "{} you have been successfully added to the queue in position: {}".format(name, len(queue))
                         await message.channel.send(msg)
             else:
                 queue = [stu]
                 id_to_list[thisid] = queue
-                msg = "{} you have been succesfully added to the queue, and you are next!".format(name)
+                msg = "{} you have been successfully added to the queue, and you are next!".format(name)
                 await message.channel.send(msg)
 
         #               leave queue
@@ -72,7 +73,7 @@ async def on_message(message):
                 queue = id_to_list[thisid]
                 if stu in queue:
                     queue.remove(stu)
-                    msg = "{} you have succesfully removed yourself from the queue.".format(name)
+                    msg = "{} you have successfully removed yourself from the queue.".format(name)
                     await message.channel.send(msg)
                 else:
                     msg = "{}, according to my records, you were already not in the queue.".format(name)
@@ -84,7 +85,7 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         if message.content.startswith('!cal'):
-            msg = "Here's the TA Schedule on Google Calendar.\nhttps://tinyurl.com/116ohCalender"
+            msg = "Here's the TA Schedule on Google Calendar. <https://tinyurl.com/116ohCalender>"
             await message.channel.send(msg)
 
         #               dequeue: TA only
@@ -92,7 +93,7 @@ async def on_message(message):
             ta = message.author.mention
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
-                if (len(queue) > 0):
+                if len(queue) > 0:
                     stu = queue.pop(0)
                     msg = "{}, you are next! {} is available to help you now!".format(stu.mention, ta)
                     await message.channel.send(msg)

@@ -14,7 +14,7 @@ def isTA(usr: discord.Member):
 
 def sanitizeString(s):
     needToEscape = ["*", "`", "~", "_", ">", "|", ":"]  # Characters that need to have an excape character placed in front of them
-    needToRemove = ["/", "."]  # Characters that need to be replaced with a space
+    needToRemove = ["\\", "/", "."]  # Characters that need to be replaced with a space
     for char in needToEscape:
         s = s.replace(char, "\\" + char)
     for char in needToRemove:

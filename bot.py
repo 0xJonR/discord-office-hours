@@ -12,12 +12,27 @@ def isTA(usr: discord.Member):
             return True
     return False
 
+def sanitizeString(s):
+    needToEscape = ["*", "`", "~", "_", ">", "|", ":"]  # Characters that need to have an excape character placed in front of them
+    needToRemove = ["/", "."]  # Characters that need to be replaced with a space
+    for char in needToEscape:
+        s = s.replace(char, "\\" + char)
+    for char in needToRemove:
+        s = s.replace(char, " ")
+    while "  " in s:  # Remove double spaces
+        s = s.replace("  ", " ")
+    return s
 
 def printQ(q):
     st = "Queue is:\n"
     for x, ele in enumerate(q):
-        nickname = "" if (not ele.nick) else " ({})".format(ele.nick)  # If the user has a nickname, add it in parenthesis
-        st += "{}. {}{}\n".format(x + 1, ele.name, nickname)
+        nickname = ele.nick
+        username = sanitizeString(ele.name)  # Sanitize input to prevent formatting
+        if nickname:
+            nickname = sanitizeString(nickname)
+            st += "{}. {} ({})\n".format(x + 1, nickname, username)
+        else:
+            st += "{}. {}\n".format(x + 1, username)
     return st
 
 

@@ -149,6 +149,10 @@ async def on_message(message):
             msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTA's will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". '''
             await message.channel.send(msg)
 
+    else:  # Not in office hours channel
+        if message.content.lower().startswith('!panik'):
+            await message.channel.send("https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+
     # TODO:
 
 

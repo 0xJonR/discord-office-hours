@@ -30,7 +30,7 @@ def printQ(q):
         username = sanitizeString(ele.name)  # Sanitize input to prevent formatting
         if nickname:
             nickname = sanitizeString(nickname)
-            st += "{}. {} ({})\n".format(x + 1, nickname, username)
+            st += "{}. {}\n".format(x + 1, nickname)
         else:
             st += "{}. {}\n".format(x + 1, username)
     return st

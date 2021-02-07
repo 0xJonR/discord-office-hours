@@ -8,7 +8,7 @@ from collections import defaultdict
 def isTA(usr: discord.Member):
     roles = usr.roles
     for x in roles:
-        if x.name.upper() == "TA":
+        if x.name.upper() == "CSE 116 TA":
             return True
     return False
 
@@ -100,7 +100,7 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         if message.content.startswith('!cal'):
-            msg = "Here's the TA Schedule on Google Calendar. <https://tinyurl.com/116ohCalender>"
+            msg = "Here's the Office Hours schedule on Piazza. https://piazza.com/class/kk305idk4vd72?cid=6"
             await message.channel.send(msg)
 
         #               dequeue: TA only
@@ -146,12 +146,12 @@ async def on_message(message):
 
         # help
         if message.content.startswith('!help'):
-            msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTA's will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". '''
+            msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTA's will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". \nThis bot is still in development and might have some minor issues. It was deployed in a rush.'''
             await message.channel.send(msg)
 
-    else:  # Not in office hours channel
-        if message.content.lower().startswith('!panik'):
-            await message.channel.send("https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+    # else:  # Not in office hours channel
+    #     if message.content.lower().startswith('!panik'):
+    #         await message.channel.send("https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
 
     # TODO:
 

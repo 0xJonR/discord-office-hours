@@ -146,7 +146,7 @@ async def on_message(message):
 
         # help
         if message.content.startswith('!help'):
-            msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTA's will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". \nThis bot is still in development and might have some minor issues. It was deployed in a rush.'''
+            msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTAs will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". \nThis bot is still in development and might have some minor issues. It was deployed in a rush.'''
             await message.channel.send(msg)
 
     # else:  # Not in office hours channel

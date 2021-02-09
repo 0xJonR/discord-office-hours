@@ -1,4 +1,5 @@
 #! /usr/bin/python
+import random
 import discord
 import sys
 
@@ -166,10 +167,18 @@ async def on_message(message):
 
 
     else:  # Not in office hours channel
-        if message.content.lower().startswith('!panik'):
-            if isTA(message.author):
-                await message.channel.send(
-                    "https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+        if isTA(message.author):  # Other fun stuff for only TAs because we don't want to spam the server
+            if message.content.lower().startswith('!panik'):
+                    await message.channel.send(
+                        "https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+
+            if message.content.lower().startswith("!pet"):
+                possibilities = ["Purr", "Purrrrr", "Meow", "😹"]
+                await message.channel.send(random.choice(possibilities))
+
+            if "bad" in message.content.lower() and "gandalf" in message.content.lower():
+                await message.channel.send("Hisssss")
+
 
 
 # TODO:

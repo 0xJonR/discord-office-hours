@@ -179,16 +179,14 @@ async def on_message(message):
             if "bad" in message.content.lower() and "gandalf" in message.content.lower():
                 await message.channel.send("Hisssss")
 
+            # From Rin:
+            if "good" in message.content.lower() and "gandalf" in message.content.lower():
+                possibilities = ["Purr", "Purrrrr", "Meow"]
+                await message.channel.send(random.choice(possibilities))
 
-
-# TODO:
-
-
-# if message.content.startswith('!room'):
-# create new role for student being helped
-# allow only that student and TAs in that room
-# max rooms = n
-# have a ~!close message to close a room
+            if "good" in message.content.lower() and "bot" in message.content.lower():
+                possibilities = ["Purr", "Purrrrr", "Meow"]
+                await message.channel.send(random.choice(possibilities))
 
 if __name__ == "__main__":
     mytoken = sys.argv[1]

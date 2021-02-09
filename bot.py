@@ -1,8 +1,8 @@
 #! /usr/bin/python
 import discord
 import sys
-from discord.ext import commands
-from collections import defaultdict
+
+__version__ = "0.2.1"
 
 
 def isTA(usr: discord.Member):
@@ -12,8 +12,10 @@ def isTA(usr: discord.Member):
             return True
     return False
 
+
 def sanitizeString(s):
-    needToEscape = ["*", "`", "~", "_", ">", "|", ":"]  # Characters that need to have an excape character placed in front of them
+    needToEscape = ["*", "`", "~", "_", ">", "|",
+                    ":"]  # Characters that need to have an excape character placed in front of them
     needToRemove = ["\\", "/", "."]  # Characters that need to be replaced with a space
     for char in needToEscape:
         s = s.replace(char, "\\" + char)
@@ -23,8 +25,9 @@ def sanitizeString(s):
         s = s.replace("  ", " ")
     return s
 
+
 def printQ(q):
-    st = "Queue is:\n"
+    st = "Students in the queue:\n"
     for x, ele in enumerate(q):
         nickname = ele.nick
         username = sanitizeString(ele.name)  # Sanitize input to prevent formatting
@@ -55,7 +58,7 @@ async def on_message(message):
     if message.channel.name == "office-hours-queue":  # only want messages in OH
 
         #               enqueue
-        if message.content.startswith('!enqueue') or message.content.startswith('!E'):
+        if message.content.startswith('!e') or message.content.startswith('!E'):
             stu = message.author
             name = stu.mention
             if thisid in id_to_list:
@@ -67,12 +70,14 @@ async def on_message(message):
                     await message.channel.send(msg)
                 else:
                     if len(queue) == 0:
-                        msg = "{} you have been successfully added to the queue, and you are first in line!".format(name)
+                        msg = "{} you have been successfully added to the queue, and you are first in line!".format(
+                            name)
                         queue.append(stu)
                         await message.channel.send(msg)
                     else:
                         queue.append(stu)
-                        msg = "{} you have been successfully added to the queue in position: {}".format(name, len(queue))
+                        msg = "{} you have been successfully added to the queue in position: {}".format(name,
+                                                                                                        len(queue))
                         await message.channel.send(msg)
             else:
                 queue = [stu]
@@ -81,7 +86,7 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         #               leave queue
-        if message.content.startswith('!leave') or message.content.startswith('!L'):
+        if message.content.startswith('!l') or message.content.startswith('!L'):
             stu = message.author
             name = stu.mention
             if thisid in id_to_list:
@@ -99,12 +104,12 @@ async def on_message(message):
                 msg = "{}, according to my records, you were already not in the queue.".format(name)
                 await message.channel.send(msg)
 
-        if message.content.startswith('!cal'):
+        if message.content.startswith('!p') or message.content.startswith('!P'):
             msg = "Here's the Office Hours schedule on Piazza. https://piazza.com/class/kk305idk4vd72?cid=6"
             await message.channel.send(msg)
 
         #               dequeue: TA only
-        if (message.content.startswith('!dequeue') or message.content.startswith('!D')) and isTA(message.author):
+        if (message.content.startswith('!d') or message.content.startswith('!D')) and isTA(message.author):
             ta = message.author.mention
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
@@ -122,14 +127,13 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         #           Clear queue: TA only
-        if (message.content.startswith('!clearqueue') or message.content.startswith('!C')) and isTA(message.author):
+        if (message.content.startswith('!c') or message.content.startswith('!C')) and isTA(message.author):
             id_to_list[thisid] = []
             msg = "Cleared the queue."
             await message.channel.send(msg)
 
         #              show queue
-        if message.content.startswith('!show') or message.content.startswith(
-                '!showqueue') or message.content.startswith('!S'):
+        if message.content.startswith('!s') or message.content.startswith('!S'):
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
                 if queue:
@@ -145,15 +149,30 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         # help
-        if message.content.startswith('!help'):
-            msg = '''To enqueue yourself, send a "!enqueue" or "!E" message.\nTo see the current Queue, send a "!show" or "!S" message.\nTAs will dequeue you with a "!dequeue" or "!D" message.\nTo leave the queue, you can use "!leave" or "!L".\nYou can view the office hours schedule with "!cal". \nThis bot is still in development and might have some minor issues. It was deployed in a rush.'''
+        if message.content.startswith('!h') or message.content.startswith('!H'):
+            msg = "__Commands For Students__\n" \
+                  "`!E` to **enter** the queue\n" \
+                  "`!S` to **show** the queue\n" \
+                  "`!L` to **leave** the queue\n" \
+                  "`!P` to view the office hours schedule on **Piazza**\n" \
+                  "`!H` to view this **help** menu\n" \
+                  "__Commands For TAs__\n" \
+                  "`!D` to **dequeue** the next student\n" \
+                  "`!C` to **clear** the queue\n" \
+                  "__About__ discord-office-hours v. {ver}\n" \
+                  "Commands are not case sensitive, and only the beginning of your message is checked.".format(
+                ver=__version__)
             await message.channel.send(msg)
 
-    # else:  # Not in office hours channel
-    #     if message.content.lower().startswith('!panik'):
-    #         await message.channel.send("https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
 
-    # TODO:
+    else:  # Not in office hours channel
+        if message.content.lower().startswith('!panik'):
+            if isTA(message.author):
+                await message.channel.send(
+                    "https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+
+
+# TODO:
 
 
 # if message.content.startswith('!room'):

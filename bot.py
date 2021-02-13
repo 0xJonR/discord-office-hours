@@ -3,7 +3,7 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
@@ -75,13 +75,17 @@ async def setOfficeHoursOpenStatus(isOpen: bool, sender, channel):
             # Closing Office Hours
             # The queue is actually cleared right with the `!C` command
             await channel.set_permissions(channel.guild.default_role, send_messages=False)
-            await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}".format(piazza_schedule_link))
+            await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}\nA TA can open office hours with `!O`".format(piazza_schedule_link))
             await setBotStatus("Office Hours Closed!")
+
+async def updateStatusToQueueLength(waitingStudentsCount: int):
+    studentsPlural = "student" if waitingStudentsCount == 1 else "students"
+    await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
 
 @client.event
 async def on_ready():  # onready is called after all guilds are added to client
-    print('We have logged in as {0.user}'.format(client))
-    await setBotStatus("Netflix until you send an open/close command")
+    print('Bot logged in as {0.user}'.format(client))
+    await setBotStatus("Netflix until you send an open/close command in a valid channel")
 
 
 @client.event
@@ -115,9 +119,7 @@ async def on_message(message):
                         msg = "{} you have been successfully added to the queue in position: {}".format(name,
                                                                                                         len(queue))
                         await message.channel.send(msg)
-                    waitingStudentsCount = len(queue)
-                    studentsPlural = "student" if waitingStudentsCount == 1 else "students"
-                    await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
+                    await updateStatusToQueueLength(len(queue))
             else:
                 queue = [stu]
                 id_to_list[thisid] = queue
@@ -134,15 +136,13 @@ async def on_message(message):
                     queue.remove(stu)
                     msg = "{} you have successfully removed yourself from the queue.".format(name)
                     await message.channel.send(msg)
-                    waitingStudentsCount = len(queue)
-                    studentsPlural = "student" if waitingStudentsCount == 1 else "students"
-                    await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
+                    await updateStatusToQueueLength(len(queue))
                 else:
                     msg = "{}, according to my records, you were already not in the queue.".format(name)
                     await message.channel.send(msg)
             else:
                 # leave called before any enqueues
-                print("edge case")
+                # print("edge case")
                 msg = "{}, according to my records, you were already not in the queue.".format(name)
                 await message.channel.send(msg)
 
@@ -159,6 +159,7 @@ async def on_message(message):
                     stu = queue.pop(0)
                     msg = "{}, you are next! {} is available to help you now!".format(stu.mention, ta)
                     await message.channel.send(msg)
+                    await updateStatusToQueueLength(len(queue))
                 else:
                     # no one in queue
                     msg = "Good job TAs! The Queue is empty!"
@@ -168,7 +169,7 @@ async def on_message(message):
                 msg = "Good job TAs! The Queue is empty!"
                 await message.channel.send(msg)
 
-        #           Clear queue: TA only
+        #           Close office hours: TA only
         if (message.content.startswith('!c') or message.content.startswith('!C')) and isTA(message.author):
             await setOfficeHoursOpenStatus(False, message.author, message.channel)
             id_to_list[thisid] = []  # Clear the queue

@@ -3,7 +3,9 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
+
+piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
 
 def isTA(usr: discord.Member):
@@ -43,10 +45,43 @@ def printQ(q):
 client = discord.Client()
 id_to_list = {}  # string->List dictionary
 
+# Set the bot's Discord status to "Watching ..."
+async def setBotStatus(message: str):
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=message))
+    print("Set bot status to 'Watching {}'".format(message))
+
+# Open or close office hours with appropriate bot messages, channel settings, and bot status
+# isOpen is the new office hours status
+# sender is the person who sent the command
+# channel is the channel the command was sent in
+async def setOfficeHoursOpenStatus(isOpen: bool, sender, channel):
+    # From https://stackoverflow.com/questions/63402412/how-to-check-a-permission-value-of-a-text-channel-discord-py
+    wasOpen: bool = channel.overwrites_for(channel.guild.default_role).send_messages  # Was office hours previously open before calling this function?
+    if wasOpen == None:
+        # Wow, this was an annoying "intended feature" to find. If the boolean is somehow "None" then it doesn't have an explicitly allowed or denied permission
+        # https://discordpy.readthedocs.io/en/latest/api.html#discord.PermissionOverwrite
+        wasOpen = True  # We'll consider it as open if it isn't explicitly closed
+
+    if isOpen == wasOpen:  # No change to make
+        await channel.send("Hey there, {}! You might not have noticed this, but office hours are already {}.".format(sender.mention, ["closed", "open"][isOpen]))
+        return
+
+    else:
+        if isOpen:
+            await channel.set_permissions(channel.guild.default_role, send_messages=True)
+            await channel.send("**Office Hours are now OPEN!**")
+            await setBotStatus("Office Hours Open!")
+        else:
+            # Closing Office Hours
+            # The queue is actually cleared right with the `!C` command
+            await channel.set_permissions(channel.guild.default_role, send_messages=False)
+            await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}".format(piazza_schedule_link))
+            await setBotStatus("Office Hours Closed!")
 
 @client.event
 async def on_ready():  # onready is called after all guilds are added to client
     print('We have logged in as {0.user}'.format(client))
+    await setBotStatus("Netflix until you send an open/close command")
 
 
 @client.event
@@ -80,6 +115,9 @@ async def on_message(message):
                         msg = "{} you have been successfully added to the queue in position: {}".format(name,
                                                                                                         len(queue))
                         await message.channel.send(msg)
+                    waitingStudentsCount = len(queue)
+                    studentsPlural = "student" if waitingStudentsCount == 1 else "students"
+                    await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
             else:
                 queue = [stu]
                 id_to_list[thisid] = queue
@@ -96,6 +134,9 @@ async def on_message(message):
                     queue.remove(stu)
                     msg = "{} you have successfully removed yourself from the queue.".format(name)
                     await message.channel.send(msg)
+                    waitingStudentsCount = len(queue)
+                    studentsPlural = "student" if waitingStudentsCount == 1 else "students"
+                    await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
                 else:
                     msg = "{}, according to my records, you were already not in the queue.".format(name)
                     await message.channel.send(msg)
@@ -106,7 +147,7 @@ async def on_message(message):
                 await message.channel.send(msg)
 
         if message.content.startswith('!p') or message.content.startswith('!P'):
-            msg = "Here's the Office Hours schedule on Piazza. https://piazza.com/class/kk305idk4vd72?cid=6"
+            msg = "Here's the Office Hours schedule on Piazza. {}".format(piazza_schedule_link)
             await message.channel.send(msg)
 
         #               dequeue: TA only
@@ -129,9 +170,13 @@ async def on_message(message):
 
         #           Clear queue: TA only
         if (message.content.startswith('!c') or message.content.startswith('!C')) and isTA(message.author):
-            id_to_list[thisid] = []
-            msg = "Cleared the queue."
-            await message.channel.send(msg)
+            await setOfficeHoursOpenStatus(False, message.author, message.channel)
+            id_to_list[thisid] = []  # Clear the queue
+            # msg = "Cleared the queue."
+            # await message.channel.send(msg)
+
+        if (message.content.startswith('!o') or message.content.startswith('!O')) and isTA(message.author):
+            await setOfficeHoursOpenStatus(True, message.author, message.channel)
 
         #              show queue
         if message.content.startswith('!s') or message.content.startswith('!S'):
@@ -159,7 +204,8 @@ async def on_message(message):
                   "`!H` to view this **help** menu\n" \
                   "__Commands For TAs__\n" \
                   "`!D` to **dequeue** the next student\n" \
-                  "`!C` to **clear** the queue\n" \
+                  "`!O` to **open** office hours\n" \
+                  "`!C` to **close** office hours and empty the queue\n" \
                   "__About__ discord-office-hours v. {ver}\n" \
                   "Commands are not case sensitive, and only the beginning of your message is checked.".format(
                 ver=__version__)
@@ -191,4 +237,3 @@ async def on_message(message):
 if __name__ == "__main__":
     mytoken = sys.argv[1]
     client.run(mytoken)  # TODO: system env to run from a bat script to keep my token safe online
-    main()

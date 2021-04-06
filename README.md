@@ -4,7 +4,7 @@ Discord Bot that implements an automatic queue for students to enqueue themselve
 
 ## List of commands: 
 * !enqueue or !E 
-  <br> Enqueues sender of message onto queue. All permissions are allowed to enqueue themselves. If one is already on the queue, sends them to the bottom.
+  <br> Enqueues sender of message onto queue. All permissions are allowed to enqueue themselves. ~~If one is already on the queue, sends them to the bottom.~~ (This functionality has been removed.)
   
 * !dequeue or !D
   <br> Dequeues head of queue, and sends a mention to the user in the channel that they're ready to be helped. **Only works if sent by user with TA role**.

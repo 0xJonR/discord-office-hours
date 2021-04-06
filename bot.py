@@ -3,10 +3,11 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
+lastQueue = ""  # Keep track of the last output from queue to prevent students spamming !S when it hasn't updated
 
 def isTA(usr: discord.Member):
     roles = usr.roles
@@ -192,6 +193,12 @@ async def on_message(message):
                 if queue:
                     # printQ
                     msg = printQ(queue)
+                    global lastQueue
+                    if lastQueue == msg:
+                        msg = "Hey {studentMention}, the queue hasn't updated since the last time it was checked. Please be patient.".format(studentMention=message.author.mention)
+                    else:
+                        lastQueue = msg
+
                     await message.channel.send(msg)
                 else:
                     msg = "The queue is empty right now."

@@ -3,7 +3,7 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
@@ -29,16 +29,20 @@ def sanitizeString(s):
     return s
 
 
+# Gets the username if they have one, otherwise their Discord name
+def getDisplayName(user):
+    nickname = user.nick
+    username = sanitizeString(user.name)
+    if nickname:
+        return sanitizeString(nickname)
+    else:
+        return username
+
 def printQ(q):
     st = "Students in the queue:\n"
     for x, ele in enumerate(q):
-        nickname = ele.nick
-        username = sanitizeString(ele.name)  # Sanitize input to prevent formatting
-        if nickname:
-            nickname = sanitizeString(nickname)
-            st += "{}. {}\n".format(x + 1, nickname)
-        else:
-            st += "{}. {}\n".format(x + 1, username)
+        studentDisplayName = getDisplayName(ele)
+        st += "{}. {}\n".format(x + 1, studentDisplayName)
     return st
 
 
@@ -104,7 +108,7 @@ async def on_message(message):
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
                 if stu in queue:
-                    msg = "{} you were already in the list!".format(name)
+                    msg = "{} you were already in the queue!".format(name)
                     await message.channel.send(msg)
                 else:
                     if len(queue) == 0:
@@ -149,13 +153,17 @@ async def on_message(message):
             await message.channel.send(msg)
 
         #               dequeue: TA only
-        if (message.content.startswith('!d') or message.content.startswith('!D')) and isTA(message.author):
+        if (message.content.lower().startswith('!d')) and isTA(message.author):
             ta = message.author.mention
+            taName = getDisplayName(message.author)
+            actionString = "Please join the `general` voice channel and wait for {taName} to pull you into a private voice channel."
+            if message.content.lower().startswith('!dm'):
+                actionString = "Please wait for {taName} to send you a direct message."
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
                 if len(queue) > 0:
                     stu = queue.pop(0)
-                    msg = "{}, you are next! {} is available to help you now!".format(stu.mention, ta)
+                    msg = "{}, you are next! {} is available to help you now!\n{}".format(stu.mention, ta, actionString.format(taName=taName))
                     await message.channel.send(msg)
                     await updateStatusToQueueLength(len(queue))
                 else:

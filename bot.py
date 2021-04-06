@@ -104,9 +104,7 @@ async def on_message(message):
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
                 if stu in queue:
-                    queue.remove(stu)
-                    queue.append(stu)
-                    msg = "{} you were already in the list! You have been moved to the back.".format(name)
+                    msg = "{} you were already in the list!".format(name)
                     await message.channel.send(msg)
                 else:
                     if len(queue) == 0:

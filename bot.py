@@ -3,7 +3,7 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
@@ -80,7 +80,7 @@ async def setOfficeHoursOpenStatus(isOpen: bool, sender, channel):
             # Closing Office Hours
             # The queue is actually cleared right with the `!C` command
             await channel.set_permissions(channel.guild.default_role, send_messages=False)
-            await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}\nA TA can open office hours with `!O`".format(piazza_schedule_link))
+            await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}\nA TA can open office hours with `!O`\nOnce office hours are open, you'll be able to send `!E` in this channel to join the queue.".format(piazza_schedule_link))
             await setBotStatus("Office Hours Closed!")
 
 async def updateStatusToQueueLength(waitingStudentsCount: int):
@@ -94,6 +94,8 @@ async def on_ready():  # onready is called after all guilds are added to client
 
 
 @client.event
+
+
 async def on_message(message):
     global id_to_list
     thisid = str(message.guild.id)
@@ -190,17 +192,22 @@ async def on_message(message):
         if message.content.startswith('!s') or message.content.startswith('!S'):
             if thisid in id_to_list:
                 queue = id_to_list[thisid]
+                currentQueue = printQ(queue)
+                global lastQueue
                 if queue:
-                    # printQ
-                    msg = printQ(queue)
-                    global lastQueue
-                    if lastQueue == msg:
-                        msg = "Hey {studentMention}, the queue hasn't updated since the last time it was checked. Please be patient.".format(studentMention=message.author.mention)
+                    if lastQueue == currentQueue:
+                        # Queue hasn't changed
+                        if isTA(message.author):  # But this is a TA, so we'll send it anyway
+                            msg = "Hey {studentMention}, the queue hasn't updated since the last time it was checked, but since you're a TA, I'll be nice :smiley_cat:\n{currentQueue}".format(studentMention=message.author.mention, currentQueue=currentQueue)
+                        else:  # Not a TA and queue hasn't changed
+                            msg = "Hey {studentMention}, the queue hasn't updated since the last time it was checked. Please be patient.".format(studentMention=message.author.mention)
                     else:
-                        lastQueue = msg
+                        msg = currentQueue
+                        lastQueue = currentQueue
 
                     await message.channel.send(msg)
                 else:
+                    lastQueue = ""
                     msg = "The queue is empty right now."
                     await message.channel.send(msg)
             else:
@@ -217,7 +224,7 @@ async def on_message(message):
                   "`!P` to view the office hours schedule on **Piazza**\n" \
                   "`!H` to view this **help** menu\n" \
                   "__Commands For TAs__\n" \
-                  "`!D` to **dequeue** the next student\n" \
+                  "`!D` or `!DM` to **dequeue** the next student\n" \
                   "`!O` to **open** office hours\n" \
                   "`!C` to **close** office hours and empty the queue\n" \
                   "__About__ discord-office-hours v. {ver}\n" \

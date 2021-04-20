@@ -3,7 +3,7 @@ import random
 import discord
 import sys
 
-__version__ = "0.2.6"
+__version__ = "0.2.7"
 
 piazza_schedule_link = "<https://piazza.com/class/kk305idk4vd72?cid=6>"
 
@@ -18,13 +18,13 @@ def isTA(usr: discord.Member):
 
 
 def sanitizeString(s):
-    needToEscape = ["*", "`", "~", "_", ">", "|",
-                    ":"]  # Characters that need to have an excape character placed in front of them
-    needToRemove = ["\\", "/", "."]  # Characters that need to be replaced with a space
+    needToEscape = ["*", "`", "~", "_", ">", "|", ":", "/", "."]  # Characters that need to have an excape character placed in front of them
+    # Update: We can actually just escape all of those.
+    # needToRemove = []  # Characters that need to be replaced with a space
     for char in needToEscape:
         s = s.replace(char, "\\" + char)
-    for char in needToRemove:
-        s = s.replace(char, " ")
+    # for char in needToRemove:
+    #     s = s.replace(char, " ")
     while "  " in s:  # Remove double spaces
         s = s.replace("  ", " ")
     return s
@@ -39,6 +39,7 @@ def getDisplayName(user):
     else:
         return username
 
+
 def printQ(q):
     st = "Students in the queue:\n"
     for x, ele in enumerate(q):
@@ -50,10 +51,12 @@ def printQ(q):
 client = discord.Client()
 id_to_list = {}  # string->List dictionary
 
+
 # Set the bot's Discord status to "Watching ..."
 async def setBotStatus(message: str):
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=message))
     print("Set bot status to 'Watching {}'".format(message))
+
 
 # Open or close office hours with appropriate bot messages, channel settings, and bot status
 # isOpen is the new office hours status
@@ -83,9 +86,11 @@ async def setOfficeHoursOpenStatus(isOpen: bool, sender, channel):
             await channel.send("**Office Hours are now CLOSED!**\nYou can view the Office Hours schedule on Piazza here: {}\nA TA can open office hours with `!O`\nOnce office hours are open, you'll be able to send `!E` in this channel to join the queue.".format(piazza_schedule_link))
             await setBotStatus("Office Hours Closed!")
 
+
 async def updateStatusToQueueLength(waitingStudentsCount: int):
     studentsPlural = "student" if waitingStudentsCount == 1 else "students"
     await setBotStatus("{} {} in queue".format(waitingStudentsCount, studentsPlural))
+
 
 @client.event
 async def on_ready():  # onready is called after all guilds are added to client
@@ -94,8 +99,6 @@ async def on_ready():  # onready is called after all guilds are added to client
 
 
 @client.event
-
-
 async def on_message(message):
     global id_to_list
     thisid = str(message.guild.id)
@@ -232,28 +235,43 @@ async def on_message(message):
                 ver=__version__)
             await message.channel.send(msg)
 
+    # else:  # Not in office hours channel
+        # Allow these in any channel now
+    if isTA(message.author):  # Other fun stuff for only TAs because we don't want to spam the server
+        msgLower = message.content.lower()
+        if message.content.lower().startswith('!panik'):
+                await message.channel.send(
+                    "https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
 
-    else:  # Not in office hours channel
-        if isTA(message.author):  # Other fun stuff for only TAs because we don't want to spam the server
-            if message.content.lower().startswith('!panik'):
-                    await message.channel.send(
-                        "https://media.discordapp.net/attachments/542843013559353344/692393206205251744/PANIK.gif")
+        # if message.content.lower().startswith("!pet"):
+        #     possibilities = ["Purr", "Purrrrr", "Meow", "😹"]
+        #     await message.channel.send(random.choice(possibilities))
+        #
+        # if "bad" in message.content.lower() and "gandalf" in message.content.lower():
+        #     await message.channel.send("Hisssss")
+        #
+        # # From Rin:
+        # if "good" in message.content.lower() and "gandalf" in message.content.lower():
+        #     possibilities = ["Purr", "Purrrrr", "Meow"]
+        #     await message.channel.send(random.choice(possibilities))
+        #
+        # if "good" in message.content.lower() and "bot" in message.content.lower():
+        #     possibilities = ["Purr", "Purrrrr", "Meow"]
+        #     await message.channel.send(random.choice(possibilities))
 
-            if message.content.lower().startswith("!pet"):
-                possibilities = ["Purr", "Purrrrr", "Meow", "😹"]
-                await message.channel.send(random.choice(possibilities))
+        # A better way by Nicholas:
+        negativeWords = ["bad", "not good", "terrible", "awful", "no good", "wrong", "incorrect", "not correct"]
+        positiveWords = ["good", "awesome", "nice", "cool", "correct", "right", "fantastic", "great", "outstanding", "amazing"]
+        negativeResponses = ["Hisssss", "Grrrrr", ":pouting_cat:", ":scream_cat:"]
+        positiveResponses = ["Purr", "Purrrrr", "Meow", ":cat:", ":heart_eyes_cat:", ":smiley_cat:", ":smile_cat:"]
 
-            if "bad" in message.content.lower() and "gandalf" in message.content.lower():
-                await message.channel.send("Hisssss")
+        # A TA is talking about the bot
+        if any(word in msgLower for word in ["gandalf", "bot"]):
+            if any(word in msgLower for word in negativeWords):  # It's negative:
+                await message.channel.send(random.choice(negativeResponses))
+            elif any(word in msgLower for word in positiveWords):  # It's positive
+                await message.channel.send(random.choice(positiveResponses))
 
-            # From Rin:
-            if "good" in message.content.lower() and "gandalf" in message.content.lower():
-                possibilities = ["Purr", "Purrrrr", "Meow"]
-                await message.channel.send(random.choice(possibilities))
-
-            if "good" in message.content.lower() and "bot" in message.content.lower():
-                possibilities = ["Purr", "Purrrrr", "Meow"]
-                await message.channel.send(random.choice(possibilities))
 
 if __name__ == "__main__":
     mytoken = sys.argv[1]
